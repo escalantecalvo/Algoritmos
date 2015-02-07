@@ -1,0 +1,1554 @@
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+#include "conio.h"
+
+#define codigojefe 515
+
+using namespace std;
+struct regUsuario
+{
+	int id_usuario;
+	int username;
+	char password[30];
+	int tipousuario; //jefe,estudiante,docente
+	bool eliminado;
+};
+
+struct regTema
+{
+	int id_tema;
+	char nombre[30];
+	int id_nivel;
+	char archivo[30];
+};
+
+struct regAlumno
+{
+	int id_alumno;
+	int nro_registro;
+	char nombre[30];
+	char apellido[30];
+	int id_materia[30];
+	int id_carrera;
+	bool eliminado;
+
+};
+
+struct regDocente
+{
+	int id_docente;
+	int nro_registro;
+	char nombre[30];
+	char apellido[30];
+	int id_materia[30];
+	bool eliminado;
+};
+
+struct regCarrera
+{
+	int id_carrera;
+	char nombrecarrera[30];
+};
+
+struct regMateria
+{
+	int id_materia;
+	char nombremateria[30];
+};
+
+struct regExamen
+{
+	int id_examen;
+	int numerodepreguntas;
+	int id_tema;
+};
+
+struct regExamenAlternativo
+{
+	int id_examen;
+	int id_pregunta;
+	char enunciado[30];
+	char A1[30];
+	char A2[30];
+	char A3[30];
+	char respuestacorrecta[30];
+};
+
+struct regTemaEstudiante
+{
+	int id_tema[30];
+	int id_alumno;
+	int nota;
+};
+
+/***************************************************/
+/*******************EXAMEN**************************/
+void RegistroExamen()
+{
+	FILE *ptr;
+	regExamen Examen;
+	ptr=fopen("Examen.txt","w+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	for(int i=1;i<=5;i++)
+	{
+		if(i==1) /*stringcopy*/
+		{	Examen.numerodepreguntas=2;
+		Examen.id_tema=1;}
+		if(i==2)
+		{	Examen.numerodepreguntas=2;
+		Examen.id_tema=2;	}		
+		if(i==3)
+			{Examen.numerodepreguntas=2;
+		Examen.id_tema=3;}
+		if(i==4)
+		{	Examen.numerodepreguntas=2;
+		Examen.id_tema=4;}
+		if(i==5)
+		{Examen.numerodepreguntas=2;
+		Examen.id_tema=5;}
+
+		Examen.id_examen =i;
+		fwrite(&Examen,sizeof(Examen),1,ptr);
+	}
+	fclose(ptr);
+	system("pause");
+}
+void CargarNota(int id_tema[],int id_examen,int username,int nota)
+{
+	FILE *ptr;
+	bool insertar=false;
+	regTemaEstudiante TemaEstudiante;
+	ptr = fopen("TemaEstudiante.txt","rb+");
+	if(ptr==NULL){cout<<"No se puede abrir o encontrar el archivo";exit(1);}
+	int i=0;
+	int j=0;
+	fread(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	int l=1;
+	while(!feof(ptr))
+	{
+		if(l==TemaEstudiante.id_tema[i] && TemaEstudiante.id_alumno==username)
+		{
+			TemaEstudiante.nota=nota;
+			insertar=true;
+		}
+		i++;
+		l++;
+		fread(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	}
+	fseek(ptr,sizeof(TemaEstudiante)*-1,SEEK_CUR);
+	fwrite(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	fclose(ptr);
+}
+void MostrarExamen(int id_tema[30],int username)
+{
+	FILE *ptr;
+	regExamen Examen;
+	int id_examen[30];
+	ptr=fopen("Examen.txt","rb+");
+	if(ptr==NULL){cout<<"No se puede abrir o encontrar el archivo";exit(1);}
+	fread(&Examen,sizeof(Examen),1,ptr);
+	int i=0;
+	int j=0;
+	while(!feof(ptr))
+	{
+		if(Examen.id_tema==id_tema[i])
+		{
+			id_examen[j]=Examen.id_examen;
+			j++;
+		}
+		fread(&Examen,sizeof(Examen),1,ptr);
+		i++;
+	}
+	fclose(ptr);
+	regExamenAlternativo ExamenAlternativas;
+	bool encontro = false;
+	int respuesta;
+	char respuesta2[5];
+	float nota=0;
+	////
+	ptr=fopen("ExamenAlternativas.txt","rb+");
+	if(ptr==NULL){cout<<"No se puede abrir o encontrar el archivo";exit(1);}
+	fread(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+	j=0;
+	int k=0;
+	while(!feof(ptr))
+	{
+		//if(id_examen[j]==ExamenAlternativas.id_examen)
+		{
+				cout<<"Examen"<<id_examen[k]<<endl;
+				cout<<"Tema"<<id_tema[k]<<endl;
+				cout<<ExamenAlternativas.enunciado<<endl;
+				cout<<"1:"<<ExamenAlternativas.A1<<endl;
+				cout<<"2:"<<ExamenAlternativas.A2<<endl;
+				cout<<"3:"<<ExamenAlternativas.A3<<endl;
+				cout<<"Introduzca la Opcion de la respuesta:";
+				cin>>respuesta;
+				switch(respuesta)
+				{
+				case 1:
+					strcpy(respuesta2, "A1");
+					break;
+				case 2:
+					strcpy(respuesta2,"A2");
+					break;
+				case 3:
+					strcpy(respuesta2,"A3");
+					break;
+				}
+				char respuesta3[30]={""};
+				strcpy(respuesta3,ExamenAlternativas.respuestacorrecta);
+				if(strcmp(respuesta3,respuesta2)==0)
+				{
+					nota+=33.33;
+				}
+		}
+		if(ExamenAlternativas.id_examen ==1 && ExamenAlternativas.id_pregunta ==3)
+		{
+			CargarNota(id_tema,ExamenAlternativas.id_examen,username,nota);
+			nota=0;
+		}
+		if(ExamenAlternativas.id_examen ==2 && ExamenAlternativas.id_pregunta ==3)
+		{
+			CargarNota(id_tema,ExamenAlternativas.id_examen,username,nota);
+			nota=0;
+		}
+		fread(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+		
+	}
+	fclose(ptr);
+
+}
+
+void dar_examen(int username)
+{
+	FILE *ptr;
+	regTemaEstudiante EstudianteTema;
+	int id_tema[30];
+	bool encontro = false;
+	////
+	ptr=fopen("TemaEstudiante.txt","rb+");
+	if(ptr==NULL){cout<<"No se puede abrir o encontrar el archivo";exit(1);}
+	fread(&EstudianteTema,sizeof(EstudianteTema),1,ptr);
+	
+	while(!feof(ptr) && encontro==false)
+	{
+		if(username==EstudianteTema.id_alumno)
+		{
+			//cout<<A.nro_registro<<"\t"<<alumno.nombre<<"\t"<<alumno.apellido<<"\t"<<BuscarCarreraAlumno(alumno.id_carrera)<<"\t"<<BuscarMateriaAlumno(alumno.id_materia)<<"\t"<<endl; 
+			 for(int i=0;i<3;i++ )
+			 {
+					id_tema[i]=EstudianteTema.id_tema[i];
+			 }
+			 encontro=true;
+		}
+		fread(&EstudianteTema,sizeof(EstudianteTema),1,ptr);
+	}
+	fclose(ptr); 
+	MostrarExamen(id_tema,username);
+}
+/***************************************************/
+/*******************EXAMENALTERNATIVAS**************/
+void RegistroExamenAlternativas()
+{
+	FILE *ptr;
+	int i=1;
+	regExamenAlternativo ExamenAlternativas;
+	ptr=fopen("ExamenAlternativas.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	ExamenAlternativas.id_examen=1;
+	for(int j=0;j<=3;j++)
+			{
+				ExamenAlternativas.id_pregunta=j;
+				
+				if(j==1)
+				{
+					strcpy(ExamenAlternativas.enunciado,"El void es:");
+					strcpy(ExamenAlternativas.A1,"No devuelve nada");
+					strcpy(ExamenAlternativas.A2,"Un error");
+					strcpy(ExamenAlternativas.A3,"Un procedimiento");
+					strcpy(ExamenAlternativas.respuestacorrecta,"A1");
+					fwrite(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+				}
+				if(j==2)
+				{
+					strcpy(ExamenAlternativas.enunciado,"El bool es:");
+					strcpy(ExamenAlternativas.A1,"Un error");
+					strcpy(ExamenAlternativas.A2,"Una variable logica");
+					strcpy(ExamenAlternativas.A3,"Una variable entera");
+					strcpy(ExamenAlternativas.respuestacorrecta,"A2");	
+					fwrite(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+				}
+				if(j==3)
+				{
+					strcpy(ExamenAlternativas.enunciado,"El int es:");
+					strcpy(ExamenAlternativas.A1,"Una variable entera");
+					strcpy(ExamenAlternativas.A2,"Un error");
+					strcpy(ExamenAlternativas.A3,"Una variable caracter");
+					strcpy(ExamenAlternativas.respuestacorrecta,"A1");	
+					fwrite(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+				}
+			}
+	ExamenAlternativas.id_examen=2;
+	for(int j=0;j<=3;j++)
+	{
+		ExamenAlternativas.id_pregunta=j;
+
+		if(j==1)
+		{
+			strcpy(ExamenAlternativas.enunciado,"Que es el strcpy:");
+			strcpy(ExamenAlternativas.A1,"Copia una cadena de caracteres a otra");
+			strcpy(ExamenAlternativas.A2,"concatena una cadena de caracteres");
+			strcpy(ExamenAlternativas.A3,"Suma dos elementos");
+			strcpy(ExamenAlternativas.respuestacorrecta,"A1");
+			fwrite(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+		}
+		if(j==2)
+		{
+			strcpy(ExamenAlternativas.enunciado,"Que es el strcat:");
+			strcpy(ExamenAlternativas.A1,"copia una cadena de caracteres a otra");
+			strcpy(ExamenAlternativas.A2,"concatena una cadena de caracteres");
+			strcpy(ExamenAlternativas.A3,"un tipo de dato");
+			strcpy(ExamenAlternativas.respuestacorrecta,"A2");	
+			fwrite(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+		}
+		if(j==3)
+		{
+			strcpy(ExamenAlternativas.enunciado,"Que es el strcmp");
+			strcpy(ExamenAlternativas.A1,"Compara dos cadenas de caracteres");
+			strcpy(ExamenAlternativas.A2,"Devuelve una cadena de caracteres");
+			strcpy(ExamenAlternativas.A3,"No hace nada / no existe");
+			strcpy(ExamenAlternativas.respuestacorrecta,"A1");	
+			fwrite(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+		}
+	}
+	fclose(ptr);
+	system("pause");
+}
+/***************************************************/
+/*******************TEMAESTUDIANTE******************/
+/*
+void CalcularNotaEstudiante(int idTema,int id_alumno)
+{
+	FILE *ptr;
+
+	regTemaEstudiante TemaEstudiante;
+
+
+
+	ptr=fopen("Usuario.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		exit(1);
+	}
+	
+	fwrite(&Usuario,sizeof(Usuario),1,ptr);
+	cout<<"Registro de Usuario Existoso"<<endl;
+	fclose(ptr);
+	getch();
+}
+*/
+
+/***************************************************/
+/************************TEMA***********************/
+void RegistroTema()
+{
+	FILE *ptr;
+	regTema Tema;
+	int id_materia;
+	char aux[30];
+	ptr=fopen("Tema.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	//cout<<"Ingrese su carrera:"<<endl<<"1:Introduccion a la Programacion"<<endl<<"2:Algoritmo y Programacion I"<<endl<<"3:Algoritmo y Programacion II"<<endl;
+	for(int i=1;i<=5;i++)
+	{
+		if(i==1) /*stringcopy*/
+		{
+			strcpy(Tema.nombre,"Estructura de un programa");
+			strcpy(Tema.archivo,"Estructura.txt");
+			Tema.id_nivel=1;}
+		if(i==2){
+			strcpy(Tema.nombre,"Variables");
+			strcpy(Tema.archivo,"Variable.txt");
+			Tema.id_nivel=1;}
+		if(i==3){
+			strcpy(Tema.nombre,"Funciones");
+			strcpy(Tema.archivo,"Funciones.txt");
+			Tema.id_nivel=2;}
+		if(i==4){
+			strcpy(Tema.nombre,"vectores");
+			strcpy(Tema.archivo,"Vectores.txt");
+			Tema.id_nivel=2;}
+		if(i==5){
+			strcpy(Tema.nombre,"string");
+			strcpy(Tema.archivo,"String.txt");
+			Tema.id_nivel=3;}
+
+		Tema.id_tema =i;
+		i++;
+		fwrite(&Tema,sizeof(Tema),1,ptr);
+	}
+	fclose(ptr);
+	system("pause");
+}
+/***************************************************/
+/*******************MATERIA*************************/
+void RegistroMateria()
+{
+	FILE *ptr;
+	regMateria Materia;
+	int id_materia;
+	char aux[30];
+	ptr=fopen("Materia.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		exit(1);
+	}
+	//cout<<"Ingrese su carrera:"<<endl<<"1:Introduccion a la Programacion"<<endl<<"2:Algoritmo y Programacion I"<<endl<<"3:Algoritmo y Programacion II"<<endl;
+	for(int i=1;i<4;i++)
+	{
+		if(i==1) /*stringcopy*/
+			strcpy(Materia.nombremateria,"Introduccion a la Programacion");
+		if(i==2)
+			strcpy(Materia.nombremateria,"Algoritmo y Programacion I");
+		if(i==3)
+			strcpy(Materia.nombremateria,"Algoritmo y Programacion II");
+			
+		Materia.id_materia=i;
+		fwrite(&Materia,sizeof(Materia),1,ptr);
+	}
+	
+	fclose(ptr);
+	getch();
+}
+
+/***************************************************/
+/*******************CARRERA*************************/
+void RegistroCarrera()
+{
+	FILE *ptr;
+	regCarrera Carrera;
+	int id_materia;
+	char aux[30];
+	ptr=fopen("Carrera.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		exit(1);
+	}
+	//cout<<"Ingrese su carrera:"<<endl<<"1:Ing Civil"<<endl<<"2:Ing Industrial"<<endl<<"3:Ing Petrolera"<<endl;
+	for(int i=1;i<4;i++)
+	{
+		if(i==1)
+			strcpy(Carrera.nombrecarrera ,"Ing Civil");
+		if(i==2)
+			strcpy(Carrera.nombrecarrera ,"Ing Industrial");
+		if(i==3)
+			strcpy(Carrera.nombrecarrera ,"Ing Petrolera");
+
+		Carrera.id_carrera =i;
+		fwrite(&Carrera,sizeof(Carrera),1,ptr);
+	}
+
+	fclose(ptr);
+	getch();
+}
+/***************************************************/
+/*******************DOCENTE*************************/
+void RegistrarDocente(int username)
+{
+	system("cls");
+	int nro_registro;
+	char nombre[30];
+	char apellido[30];
+	int id_carrera;
+	int id_materia[30];
+	int opc;
+	nro_registro=username;
+	cout<<"Ingrese su nombre:"<<endl;
+	cin>>nombre;
+	cout<<"Ingrese su apellido:"<<endl;
+	cin>>apellido;
+	int cantmat;
+	cout<<"Ingrese la cantidad de materias a dar:";
+	cin>>cantmat;
+	int intentos=0;
+	do 
+	{
+		if(intentos>0)
+		{
+			cout<<"Cantidad de materia sobrepasa a la cantidad de registradas:";
+		}
+		cin>>cantmat;
+		intentos++;
+	} while (cantmat>3);
+	int j=0;
+	do{
+		cout<<"Ingrese su materia:"<<endl<<"1:Introduccion a la programacion"<<endl<<"2:Programacion y algoritmo I"<<endl<<"3:Programacion y algoritmo II"<<endl;
+		cin>>opc;
+		switch(opc)
+		{
+		case 1:
+			id_materia[j]=1;
+			break;
+		case 2:
+			id_materia[j]=2;
+			break;
+		case 3:
+			id_materia[j]=3;
+			break;
+		}
+		j++;
+	}while(j<cantmat);
+	FILE *ptr;
+	regDocente Docente;
+	ptr=fopen("Docente.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	strcpy(Docente.nombre,nombre);
+	strcpy(Docente.apellido,apellido);
+	Docente.nro_registro=nro_registro;
+	for(int j=0;j<cantmat;j++)
+	{
+		Docente.id_materia[j]=id_materia[j];
+	}
+	Docente.eliminado=false;
+	fwrite(&Docente,sizeof(Docente),1,ptr);
+	cout<<"Registro de Docente Existoso"<<endl;
+	fclose(ptr);
+	system("pause");
+}
+void ModificarRegDocente(int id_docente){
+	FILE *ptr;
+	regDocente Docente;
+	char nombre[30],apellido[30];
+	int id_materia[30],id,opc;
+	char contrasenha;
+
+	int temas[30];
+	ptr=fopen("Alumno.txt","rb+");
+	if(ptr==NULL)
+	{cout<<endl<<"el archivo no existe";
+	system("pause");
+	}
+	else
+	{
+		fseek(ptr,(id_docente-1000)*sizeof(Docente),SEEK_SET);
+		if(!feof(ptr))
+		{
+			fread(&Docente,sizeof(Docente),1,ptr);
+			if(Docente.eliminado==false)
+			{ 
+				cout<<"Ingrese el nombre del docente"<<endl;
+				cin>>nombre;
+				cout<<"Ingrese el apellido del docente"<<endl;
+				cin>>apellido;
+				int cantmat;
+				cout<<"Ingrese la cantidad de temas que va a dar";
+				int intentos=0;
+				do 
+				{
+					if(intentos>0)
+					{
+						cout<<"Cantidad de materia sobrepasa a la cantidad de registradas:";
+					}
+					cin>>cantmat;
+					intentos++;
+				} while (cantmat>3);
+				int j=0;
+				do{
+					cout<<"Ingrese su materia:"<<endl<<"1:Introduccion a la programacion"<<endl<<"2:Programacion y algoritmo I"<<endl<<"3:Programacion y algoritmo II"<<endl;
+					cin>>opc;
+					switch(opc)
+					{
+					case 1:
+						id_materia[j]=1;
+						break;
+					case 2:
+						id_materia[j]=2;
+						break;
+					case 3:
+						id_materia[j]=3;
+						break;
+					}
+					j++;
+				}while(j<cantmat);
+				/*
+				buscar los nuevos temas de la nueva materia que va a modificar
+				*/
+				strcpy(Docente.nombre,nombre);
+				strcat(Docente.nombre," ");
+				strcat(Docente.nombre,apellido);
+				for(int j=0;j<cantmat;j++)
+				{
+					Docente.id_materia[j]=id_materia[j];
+				}
+				fseek(ptr,(id_docente-1000)*sizeof(Docente),SEEK_SET);
+				fwrite(&Docente,sizeof(Docente),1,ptr);
+			}
+			else
+			{cout<<"este Docente fue eliminado";
+			}
+		}
+		fclose(ptr);
+	}
+	getch();
+}
+
+void EliminarRegDocente(int id_docente){
+	FILE*ptr;
+	regDocente Docente;
+	ptr=fopen("Docente.txt","rb+");
+	if(ptr==NULL)
+	{cout<<"el archivo no existe";
+	system("pause");
+	}
+	else
+	{
+	fseek(ptr,(id_docente-1000)*sizeof(Docente),SEEK_SET);
+	if(!feof(ptr))
+	{
+		fread(&Docente,sizeof(Docente),1,ptr);
+		if(Docente.eliminado ==false)
+		{
+			fseek(ptr,(id_docente-1000)*sizeof(Docente),SEEK_SET);
+			Docente.eliminado=true;
+			fwrite(&Docente,sizeof(Docente),1,ptr);
+			cout<<endl<<"El docente ha sido eliminado...";
+			system("pause");
+		}
+		else
+		{cout<<"este docente ya ha sido eliminado";}
+	}
+	fclose(ptr);
+	}
+	getch();
+}
+
+/***************************************************/
+void CargarMateriaAlumno(int id_materia[] , int username , int cantmat)
+{
+	FILE *ptr;
+	regTemaEstudiante TemaEstudiante;
+	ptr=fopen("TemaEstudiante.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		exit(1);
+	}
+	TemaEstudiante.id_alumno=username;
+	for(int j=0;j<cantmat;j++)
+	{
+		TemaEstudiante.id_tema[j]=id_materia[j];
+		TemaEstudiante.nota=0;
+		fwrite(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	}
+
+	fclose(ptr);
+
+}
+/*******************ALUMNO**************************/
+void RegistroAlumno(int username)
+{
+	int nro_registro;
+	char nombre[30];
+	char apellido[30];
+	int id_carrera;
+	int id_tema[30];
+	int opc;
+	int id_usuario;
+	nro_registro=username;
+	cout<<"Ingrese su nombre:"<<endl;
+	cin>>nombre;
+	cout<<"Ingrese su apellido:"<<endl;
+	cin>>apellido;
+	do{
+		cout<<"Ingrese su carrera:"<<endl<<"1:Ing Civil"<<endl<<"2:Ing Industrial"<<endl<<"3:Ing Petrolera"<<endl;
+		cin>>opc;
+		switch(opc)
+		{
+		case 1:
+			id_carrera=1;
+			break;
+		case 2:
+			id_carrera=2;
+			break;
+		case 3:
+			id_carrera=3;
+			break;
+		}
+		
+	}while(opc>4 && opc<1 );
+	int canttemas;
+	cout<<"ingrese los cantidad de temas:";
+	cin>>canttemas;
+	int i=0;
+	do{
+		cout<<"Ingrese su temas:"<<endl<<"1:Estructura de un programa"
+			<<endl<<"2:Variables"<<endl
+			<<"3:Funciones"<<endl
+			<<"4:vectores"<<endl
+			<<"5:string"<<endl;
+		cin>>opc;
+		switch(opc)
+		{
+		case 1:
+			id_tema[i]=1;
+			break;
+		case 2:
+			id_tema[i]=2;
+			break;
+		case 3:
+			id_tema[i]=3;
+			break;
+		case 4:
+			id_tema[i]=4;
+			break;
+		case 5:
+			id_tema[i]=5;
+			break;
+		}
+		i++;
+	}while(i<canttemas);
+	CargarMateriaAlumno(id_tema , username,canttemas);
+	
+	FILE *ptr;
+	regAlumno Alumno;
+	ptr=fopen("Alumno.txt","wb+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	cout<<"Introduzca el id del alumno:";
+	cin>>id_usuario;
+	Alumno.id_alumno=id_usuario;
+	Alumno.id_carrera=id_carrera;
+	strcpy(Alumno.nombre,nombre);
+	strcpy(Alumno.apellido,apellido);
+	Alumno.nro_registro=nro_registro;
+	for(int i=0;i<canttemas;i++)
+	{
+		Alumno.id_materia[i]=id_tema[i];
+	}	
+	Alumno.eliminado=false;
+	fwrite(&Alumno,sizeof(Alumno),1,ptr);
+	cout<<"Registro de Alumno Existoso"<<endl;
+	fclose(ptr);
+	system("pause");
+}
+void ModificarRegAlumno(){
+	FILE *ptr;
+	regAlumno Alumno;
+	int ContraIncorrecta=0,id_alumno;
+	char nombre[30],apellido[30];
+	int id_carrera,opc;
+	int id_tema[30];
+	ptr=fopen("Alumno.txt","rb+");
+	if(ptr==NULL)
+	{cout<<endl<<"el archivo no existe";
+	system("pause");
+	}
+	else
+	{
+		cout<<"introducir id del alumno a modificar";
+		cin>>id_alumno;
+		fseek(ptr,(id_alumno-1000)*sizeof(Alumno),SEEK_SET);
+		if(!feof(ptr))
+		{
+			fread(&Alumno,sizeof(Alumno),1,ptr);
+			if(Alumno.eliminado==false)
+			{ 
+				do{
+					cout<<"Ingrese su carrera:"<<endl<<"1:Ing Civil"<<endl<<"2:Ing Industrial"<<endl<<"3:Ing Petrolera"<<endl;
+					cin>>opc;
+					switch(opc)
+					{
+					case 1:
+						id_carrera=1;
+						break;
+					case 2:
+						id_carrera=2;
+						break;
+					case 3:
+						id_carrera=3;
+						break;
+					}
+
+				}while(opc>4 && opc<1 );
+				int canttemas;
+				cout<<"ingrese los cantidad de temas:";
+				cin>>canttemas;
+				int i=0;
+				do{
+					cout<<"Ingrese su temas:"<<endl<<"1:Estructura de un programa"
+						<<endl<<"2:Variables"<<endl
+						<<"3:Funciones"<<endl
+						<<"4:vectores"<<endl
+						<<"5:string"<<endl;
+					cin>>opc;
+					switch(opc)
+					{
+					case 1:
+						id_tema[i]=1;
+						break;
+					case 2:
+						id_tema[i]=2;
+						break;
+					case 3:
+						id_tema[i]=3;
+						break;
+					case 4:
+						id_tema[i]=4;
+						break;
+					case 5:
+						id_tema[i]=5;
+						break;
+					}
+					i++;
+				}while(i<canttemas);
+
+				strcpy(Alumno.nombre,nombre);
+				strcat(Alumno.nombre," ");
+				strcat(Alumno.nombre,apellido);
+				Alumno.id_carrera=id_carrera;
+				for(int i=0;i<canttemas;i++)
+				{
+					Alumno.id_materia[i]=id_tema[i];
+				}
+				fseek(ptr,(id_alumno-1000)*sizeof(Alumno),SEEK_SET);
+				fwrite(&Alumno,sizeof(Alumno),1,ptr);
+			}
+			else
+			{cout<<"este alumno fue eliminado";
+			}
+		}
+		fclose(ptr);
+	}
+	getch();
+}
+
+void EliminarRegAlumno(){
+	FILE*ptr;
+	regAlumno Alumno;
+	int id_alumno;
+	ptr=fopen("Alumno.txt","rb+");
+	if(ptr==NULL)
+	{cout<<"el archivo no existe";
+	system("pause");
+	}
+	else
+	{cout<<"introducir id del alumno a eliminar";
+	cin>>id_alumno;
+	fseek(ptr,(id_alumno-1000)*sizeof(Alumno),SEEK_SET);
+	if(!feof(ptr))
+	{
+		fread(&Alumno,sizeof(Alumno),1,ptr);
+		if(Alumno.eliminado ==false)
+		{
+			fseek(ptr,(id_alumno-1000)*sizeof(Alumno),SEEK_SET);
+			Alumno.eliminado=true;
+			fwrite(&Alumno,sizeof(Alumno),1,ptr);
+			cout<<endl<<"El alumno ha sido eliminado...";
+			system("pause");
+		}
+		else
+		{cout<<"este alumno ya ha sido eliminado";}
+	}
+	fclose(ptr);
+	}
+	getch();
+}
+
+
+char * BuscarCarreraAlumno(int id)
+{
+	//static char carrera[30];
+	FILE *ptr;
+	regCarrera Carrera;
+	char *cadena = (char *)malloc(sizeof(char) * 30);
+	bool encontro=false;
+	ptr=fopen("Carrera.txt","rb");
+	fread(&Carrera, sizeof(Carrera),1, ptr);//consulta el archivo
+	while((!feof(ptr)) && (encontro==false))
+	{ //apertura del while
+		if(id == Carrera.id_carrera)//compara una cadena de caracteres
+		{ 
+			strcpy(cadena,Carrera.nombrecarrera);
+			encontro=true;
+		}
+		fread(&Carrera, sizeof(Carrera),1, ptr);
+	} //cierre del while
+	fclose(ptr);
+	return cadena;
+}
+
+char * BuscarMateriaAlumno(int id)
+{
+	FILE *ptr;
+	char *cadena = (char *)malloc(sizeof(char) * 30);
+	regTema Materia;
+	bool encontro=false;
+	ptr=fopen("Tema.txt","rb+");
+	fread(&Materia, sizeof(Materia),1, ptr);//consulta el archivo
+		while((!feof(ptr)) && encontro==false)
+		{
+			if(id == Materia.id_tema)//compara una cadena de caracteres
+			{ 
+				strcpy(cadena,Materia.nombre);
+				encontro=true;
+			}
+			fread(&Materia, sizeof(Materia),1, ptr);
+		}
+	fclose(ptr);
+	if(encontro==false)
+		strcpy(cadena,"");
+	return cadena;
+}
+
+void imprimirAlumno(int nro_registro)
+{
+	system("cls");
+	char cadena1[30];
+	char cadena2[30];
+	bool imprimido=false;
+	cout<<"Datos de Alumno con registro:"<<nro_registro<<"\n\n";
+	FILE *ptr;
+	regAlumno alumno;
+	char vacio[10]={""};
+	ptr=fopen("Alumno.txt","rb+");   //rb para lctura
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrarar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	fread(&alumno,sizeof(alumno),1,ptr);
+	cout<<"Nro Registro\tNombre\t\tApellido\tCarrera\t\tMateria \n\n";
+	while(!feof(ptr))
+	{
+		if((nro_registro==alumno.nro_registro)&&(imprimido==false)&&(alumno.eliminado==false))
+		{
+			cout<<alumno.nro_registro<<"\t"<<alumno.nombre<<"\t\t"<<alumno.apellido<<"\t"<<BuscarCarreraAlumno(alumno.id_carrera)<<endl;
+			cout<<"Materias"<<endl;
+			for(int i=0;i<10;i++)
+			{
+				if(strcmp(BuscarMateriaAlumno(alumno.id_materia[i]),vacio)!=0)
+					cout<<BuscarMateriaAlumno(alumno.id_materia[i])<<endl; 
+			}
+			imprimido=true;
+		}
+		fread(&alumno,sizeof(alumno),1,ptr);
+	}
+	fclose(ptr);
+	if(imprimido==false){cout<<"Ha sido eliminado de la base de datos por el administrador,comuniquese con informacion para que lo rehabiliten...gracias >=) ";}
+	system("pause");
+}
+
+/***************************************************/
+/*******************USUARIO*************************/
+int IniciSesion(int user,char pass[])
+{
+	int encontro=0;
+	FILE *ptr;
+	regUsuario usuario;
+	ptr=fopen("Usuario.txt","rb+");
+	fread(&usuario, sizeof(usuario),1, ptr);//consulta el archivo
+	while((!feof(ptr)) && (encontro==0))
+	{ //apertura del while
+			if(user==usuario.username)//compara una cadena de caracteres
+			{ 
+				if((strcmp(pass,usuario.password)==0)&&(usuario.eliminado==false))
+				{
+					encontro=usuario.tipousuario;
+				}
+			}
+		fread(&usuario, sizeof(usuario),1, ptr);
+	} //cierre del while
+	fclose(ptr);
+	return encontro;
+}
+
+bool VerificarSiExisteUsuario(int username)
+{
+	bool encontro=false;
+	FILE *ptr;
+	regUsuario usuario;
+	ptr=fopen("Usuario.txt","rb+");
+	if(ptr==NULL)
+	{
+		cout<<"archivo vacio";
+		system("pause");
+		exit(1);
+	}
+	fread(&usuario, sizeof(usuario),1, ptr);//consulta el archivo
+	while((!feof(ptr)) && (encontro==false))
+	{ //apertura del while
+		if(username==usuario.username)//compara una cadena de caracteres
+		{ 
+			encontro=true;
+		}
+		else
+		{
+			fread(&usuario, sizeof(usuario),1, ptr);
+		}
+	} //cierre del while
+	fclose(ptr);
+	return encontro;
+}
+int contardigitos(int nro)//cuenta los digitos y me develve que tipo de usuario es
+{
+	int cont=0;
+
+		while(nro!=0)
+		{
+			nro=nro/10;
+			cont++;
+		}
+		if(cont==3)
+		{
+			return 3;//docente
+		}
+		if(cont>3)
+		{
+			return 2;//estudiante
+		}
+
+}
+void RegistroUsuario()
+{
+	FILE *ptr;
+	bool encontro=false;
+	int id_usuario;
+	int opc2,tipousuario,username,ContraIncorrecta=0;
+	char password2[30]={""},password[30]={""};
+	regUsuario Usuario;
+	do{	
+		if(encontro==true){cout<<"El usuario ingresado ya existe"<<endl;}
+		encontro=false;
+		cout<<"nro de registro:";
+		cin>>username;
+		encontro = VerificarSiExisteUsuario(username);
+	}while(encontro!=false);
+	do{	
+		if(ContraIncorrecta>0)
+		{
+			cout<<"Las Contraseñas no son iguales"<<endl;
+		}
+		cout<<"Password:"<<endl;
+		cin>>password;
+		cout<<"Repetir Contraseña"<<endl;
+		cin>>password2;
+		ContraIncorrecta++;
+	}while(strcmp(password,password2)!=0 || (strcmp(password,"")==0 && strcmp(password2,"")));
+	cout<<"ingrese el id del usuario:"<<endl;
+	cin>>id_usuario;
+	tipousuario=contardigitos(id_usuario);
+	Usuario.tipousuario=tipousuario;
+	ptr=fopen("Usuario.txt","ab+");   //ab crea o anade al final
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrar el archivo..";
+		exit(1);
+	}
+	Usuario.username = username;
+	Usuario.eliminado=false;
+	strcpy(Usuario.password,password);
+		fwrite(&Usuario,sizeof(Usuario),1,ptr);
+		cout<<"Registro de Usuario Existoso"<<endl;
+	fclose(ptr);
+	getch();
+}
+void ModificarRegUsuario(){
+	FILE *ptr;
+	regUsuario Usuario;
+	int ContraIncorrecta=0,id_usuario;
+	char password[30]={""},password2[30]={""};
+	ptr=fopen("Usuario.txt","rb+");
+	if(ptr==NULL)
+	{cout<<endl<<"el archivo no existe";
+	system("pause");
+	}
+	else
+	{
+		cout<<"introducir id del usuario a modificar";
+		cin>>id_usuario;
+		fseek(ptr,(id_usuario-1000)*sizeof(Usuario),SEEK_SET);
+		if(!feof(ptr))
+		{
+			fread(&Usuario,sizeof(Usuario),1,ptr);
+			if(Usuario.eliminado==false)
+			{ 
+
+				do{	
+					if(ContraIncorrecta>0)
+					{
+						cout<<"Las Contraseñas no son iguales"<<endl;
+					}
+					cout<<"Password:"<<endl;
+					cin>>password;
+					cout<<"Repetir Contraseña"<<endl;
+					cin>>password2;
+					ContraIncorrecta++;
+				}while(strcmp(password,password2)!=0 || (strcmp(password,"")==0 && strcmp(password2,"")));
+
+				strcpy(Usuario.password,password);
+
+				fseek(ptr,(id_usuario-1000)*sizeof(Usuario),SEEK_SET);
+				fwrite(&Usuario,sizeof(Usuario),1,ptr);
+			}
+			else
+			{cout<<"este usuario fue eliminado";
+			}
+		}
+		fclose(ptr);
+	}
+	getch();
+}
+
+void EliminarRegUsuario(){
+	FILE*ptr;
+	regUsuario Usuario;
+	int id_usuario;
+	bool encontro=false;
+	ptr=fopen("Usuario.txt","rb+");
+	if(ptr==NULL)
+	{cout<<"el archivo no existe";
+		system("pause");
+	}
+	else
+	{cout<<"introducir id del usuario a eliminar:";
+	cin>>id_usuario;
+	//fseek(ptr,(id_usuario-100)*sizeof(Usuario),SEEK_SET);
+	fread(&Usuario,sizeof(Usuario),1,ptr);
+	while(!feof(ptr) && encontro==false)
+	{
+		if(id_usuario==Usuario.username)
+			encontro=true;
+
+		fread(&Usuario,sizeof(Usuario),1,ptr);
+	}
+	fseek(ptr,sizeof(Usuario)*(-1),SEEK_CUR);
+	fwrite(&Usuario,sizeof(Usuario),1,ptr);
+	fclose(ptr);
+	}
+	getch();
+}
+
+void EliminarLogicamenteAlumno(int username)
+{  //Devuelve 0 si no hay el registo si hay el registro un valor diferente de 0
+	FILE *p;
+	regAlumno alumno;
+	int cont = 0, nroReg = 0;
+	bool encontro=false;
+	p=fopen("Alumno.txt","rb+");
+	fread(&alumno,sizeof(alumno),1,p);
+	while(!feof(p) && encontro==false)
+	{
+		if(alumno.nro_registro == username)
+		{	
+			alumno.eliminado=true;
+			encontro=true;
+			fwrite(&alumno,sizeof(alumno),1,p);
+			cout<<"Eliminado con exito"<<endl;
+			system("pause");
+		}
+		fread(&alumno,sizeof(alumno),1,p);
+
+	}
+	fclose(p);
+}
+
+void imprimirUsuario(void)
+{
+	system("cls");
+	cout<<"Imprimir registros del archivo usuario\n\n";
+	FILE *ptr;
+	regUsuario usuario;
+	ptr=fopen("Usuario.txt","rb+");   //rb para lctura
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrarar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	fread(&usuario,sizeof(usuario),1,ptr);
+	cout<<"User\t\tPass\t\tTipoUsuario \n\n";
+	while(!feof(ptr)&&(usuario.eliminado==false))
+	{
+		cout<<usuario.username<<"\t\t"<<usuario.password<<"\t"<<usuario.tipousuario<<endl; 
+		fread(&usuario,sizeof(usuario),1,ptr);
+	}
+	fclose(ptr);
+	getch();
+}
+void imprimirTemaUsuario(void)
+{
+	system("cls");
+	cout<<"Imprimir registros del archivo temausuario\n\n";
+	FILE *ptr;
+	regTemaEstudiante TemaEstudiante;
+	ptr=fopen("TemaEstudiante.txt","rb+");   //rb para lctura
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrarar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	fread(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	cout<<"usuario\t\idtema\t\tnota \n\n";
+	int i=0;
+	while(!feof(ptr))
+	{
+
+		cout<<TemaEstudiante.id_alumno <<"\t\t"<<TemaEstudiante.id_tema[i] <<"\t"<<TemaEstudiante.nota <<endl; 
+		i++;
+		fread(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	}
+	fclose(ptr);
+	getch();
+}
+void imprimirExamenAlternativo(void)
+{
+	system("cls");
+	cout<<"Imprimir registros del archivo temausuario\n\n";
+	FILE *ptr;
+	regExamenAlternativo ExamenAlternativas;
+	ptr=fopen("ExamenAlternativas.txt","rb+");   //rb para lctura
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrarar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	fread(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+	while(!feof(ptr))
+	{
+		cout<<"\t\t"<<ExamenAlternativas.id_examen <<"\t"<<ExamenAlternativas.id_pregunta <<ExamenAlternativas.enunciado <<ExamenAlternativas.A1 <<ExamenAlternativas.A2<<ExamenAlternativas.A3<<ExamenAlternativas.respuestacorrecta<< endl; 
+		fread(&ExamenAlternativas,sizeof(ExamenAlternativas),1,ptr);
+	}
+	fclose(ptr);
+	getch();
+}
+
+
+void imprimirTemas(void)
+{
+	system("cls");
+	cout<<"Imprimir registros del archivo temausuario\n\n";
+	FILE *ptr;
+	regTema Tema;
+	ptr=fopen("Tema.txt","rb+");   //rb para lctura
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrarar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	fread(&Tema,sizeof(Tema),1,ptr);
+	cout<<"Id_tema\t\tnombre\t\tId_nivel\t\tArchivo \n\n";
+	while(!feof(ptr))
+	{
+		cout<<Tema.id_tema<<"\t\t"<<Tema.nombre<<"\t\t"<<Tema.id_nivel<<"\t\t"<<Tema.archivo<<endl;
+		fread(&Tema,sizeof(Tema),1,ptr);
+	}
+	fclose(ptr);
+	getch();
+}
+
+void imprimirPromedioTemas(int username)
+{
+	system("cls");
+	cout<<"Promedio de temas vistos por el usuario\n\n";
+	FILE *ptr;
+	int notaacumulada=0;
+	int promedio=0;
+	int cant=0;
+	regTemaEstudiante TemaEstudiante;
+	ptr=fopen("TemaEstudiante.txt","rb+");   //rb para lctura
+	if(ptr == NULL)
+	{
+		cout<<"No se pudo abrir o encontrarar el archivo..";
+		system("pause");
+		exit(1);
+	}
+	fread(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	cout<<"Usuario\t\Nota\n\n";
+	while(!feof(ptr))
+	{
+		if(username==TemaEstudiante.id_alumno)
+		{
+			notaacumulada=TemaEstudiante.nota;
+			cant++;
+		}
+		fread(&TemaEstudiante,sizeof(TemaEstudiante),1,ptr);
+	}
+	promedio = notaacumulada/cant;
+	cout<<"El promedio del usuario es:"<<username<<"\t"<<promedio<<endl;
+	fclose(ptr);
+	system("pause");
+	exit(1);
+}
+
+/*************************************************************/
+/*******************MENUS***************************/
+void MenuAlumno(int username)
+{
+	int op;
+	char seguro;
+	do{
+		system("cls");
+		cout<<"Menu Alumno"<<endl;
+		cout<<"1: Datos Alumno"<<endl;
+		cout<<"2: Registro Alumno"<<endl;
+		cout<<"3: Eliminar Logicamente Alumno"<<endl;
+		cout<<"4: Dar Exmaen"<<endl;
+		cout<<"5: Imprimir promedio de examenes realizados"<<endl;
+		cout<<"0: Salir\n";
+		cin>>op;
+		switch(op)
+		{
+		case 1:	imprimirAlumno(username);
+			break;
+		case 2: RegistroAlumno(username);
+			break;
+		case 3: EliminarLogicamenteAlumno(username);
+			op=0;
+			break;
+		case 4: 
+			dar_examen(username);
+			break;
+		case 5:
+			imprimirTemas();
+			break;
+		default:
+			system("cls");
+			cout<<"\n\n\n\n\nhasta una nueva oportunidad";
+		}
+
+	}while(op != 0);
+}
+
+void MenuDocente(int username)
+{
+	int op;
+	system("cls");
+	cout<<"Menu Docente\n\n";
+	cout<<"1. Reporte Nota\n";
+	cout<<"2. Registro Docente\n";
+	cout<<"0. Salir\n";
+	do{
+		system("cls");
+		cout<<"MENU PRINCIPAL\n\n";
+		cout<<"1. Datos Docente\n";
+		cout<<"2. RegistrarDocente\n";
+		cout<<"3. ModificarDocente\n";
+		cout<<"4. EliminarDocente\n";
+		cout<<"0. Salir\n";
+		cout<<"Digite opcion : ";
+		cin>>op;
+		switch(op)
+		{
+		case 1:
+			break;
+		case 2:RegistrarDocente(username);
+			break;
+		case 3:ModificarRegDocente(username);
+			break;
+		case 4:EliminarRegDocente(username);
+		}
+	}while(!((op >= 0) && (op <= 2)));
+}
+
+void MenuUsuario(void)
+{	
+	int id_usuario;
+	int username;
+	char password[30];
+	int tipousuario; //jefe,estudiante,docente
+	int opcion2;
+	int ContraIncorrecta=0;
+
+	int opcion;  
+
+
+	do{
+		system("cls");
+		cout<<"Menu Usuario:"<<endl;
+		cout<<"1:Inicio de Sesion:"<<endl;
+		cout<<"2:Usuario Nuevo:"<<endl;
+		cout<<"3:Eliminar Logicamente a un usuario"<<endl;
+		cout<<"4:Modificar a un usuario"<<endl;
+		cout<<"0:salir"<<endl;
+		cout<<"Introduzca su opcion:";
+
+		cin>>opcion;
+		switch(opcion)
+		{
+		case 1: 
+			system("cls");
+			cout<<"User:";
+			cin>>username;
+			cout<<endl<<"Pass:";
+			cin>>password;
+			tipousuario = IniciSesion(username,password);
+			if(tipousuario>0)
+			{
+				cout<<"ingreso"<<endl<<endl;
+				if(tipousuario == 1) //jefe
+				{
+					//MenuJefe();
+				}
+				if(tipousuario == 2) //alumno
+				{
+					MenuAlumno(username);
+				}
+				if(tipousuario ==3) //Docente
+				{
+					MenuDocente(username);
+				}
+			}
+			else{cout<<"Usuario no existente en la base de datos"<<endl;system("pause");}
+			break;
+		case 2:
+			system("cls");
+			cout<<"Registro de Usuario Nuevo"<<endl;		
+			RegistroUsuario();
+			break;
+		case 3:
+			EliminarRegUsuario();
+			break;
+		case 4:
+			ModificarRegUsuario();
+			break;
+		case 5:
+			imprimirUsuario();
+		}
+	}while(opcion!=0);
+
+}
+
+void MenuAdministrador(void)
+{
+	int op;
+	int username;
+	do{
+		system("cls");
+		cout<<"Menu de Administrador"<<endl;
+		cout<<"1: Eliminar Logicamente Alumno"<<endl;
+		cout<<"2: Eliminar Logicamente Usuario"<<endl;
+		cout<<"3: Eliminar Logicamente Docente"<<endl;
+		cout<<"4: Imprimir Alumno"<<endl;
+		cout<<"5: Imprimir examen Alternativo"<<endl;
+		cout<<"6: Imprimir temas"<<endl;
+		cout<<"7: Imprimir TemasUsuarios"<<endl;
+		cout<<"0. Salir"<<endl;
+		cout<<"Digite opcion : ";
+		cin>>op;
+		switch(op)
+		{
+		case 1:
+			cout<<"ingrese el nro de usuario del alumno a eliminar:";
+			cin>>username;
+			EliminarLogicamenteAlumno(username);
+			break;
+		case 2:
+			cout<<"ingrese el nro de usuario a eliminar:";
+			cin>>username;
+			EliminarRegUsuario();
+			break;
+		case 3:
+			cout<<"ingrese el nro de usuario del docente a eliminar:";
+			cin>>username;
+			EliminarRegDocente(username);
+			break;
+		case 4:
+			cout<<"ingrese el nro de usuario del alumno :";
+			cin>>username;
+			imprimirAlumno(username);
+			break;
+		case 5:
+			imprimirExamenAlternativo();
+			break;
+		case 6:
+			cout<<"ingrese el nro de usuario del alumno :";
+			cin>>username;
+			imprimirPromedioTemas(username);
+			break;
+		case 7:
+			imprimirTemaUsuario();
+			break;
+		}
+}while(!((op >= 0) && (op <= 2)));
+	
+}
+/**************************************************/
+int main()
+{
+	//RegistroExamenAlternativas();
+	//imprimirExamenAlternativo();
+	//imprimirTemas();
+	//imprimirTemaUsuario();
+	//RegistroTema();
+	//RegistroExamen();
+	
+	/*Solo sirve para crearlo una sola vez los archivos y cargarlo de datos*/
+	//RegistroCarrera();
+	//RegistroMateria();
+	int opc;
+	int cod;
+	do{
+		cout<<"Menu Principal"<<endl;
+		cout<<"1:Iniciar sesion como adminitrador"<<endl;
+		cout<<"2:Iniciar sesion como usuario"<<endl;
+		cout<<"0:salir"<<endl;
+		cin>>opc;
+		switch(opc)
+		{
+		case 1:	
+				system("cls");
+				cout<<"Ingrese el codigo del administrador:";
+				cin>>cod;
+				if(cod==codigojefe)
+				{	MenuAdministrador();
+					system("cls");
+					break;
+				}
+				else{
+					break;}
+		case 2: 
+				MenuUsuario();
+					system("cls");
+				break;
+		default:
+			system("cls");
+			cout<<"\n\n\n\n\nhasta una nueva oportunidad";
+		}
+
+	}while(opc != 0);
+}
+
+
