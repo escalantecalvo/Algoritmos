@@ -1,0 +1,224 @@
+• SECUENCIA 0 -1 -1 -2 -4 -7 -13
+#include "stdafx.h"
+#include <iostream>
+#include "conio.h"
+using namespace std;
+void secuencia (int n);
+int main()
+{
+int n;
+do
+{
+cout<<"Ingrese hasta el numero que quiere mostrar: ";
+cin>>n;
+}while(n<4);
+secuencia(n) ;
+getchar();
+system("pause");
+return 0;
+}
+void secuencia(int n)
+{
+int a=-1,b=1,c=0,res,i=0;
+while(i<n)
+{
+res=a+b+c;
+a=b;
+b=c;
+c=res;
+cout<<res<<"\t";
+i++;
+}
+}
+• SECUENCIA 1 4 9 61 52 63
+#include "stdafx.h"
+#include <iostream>
+#include "conio.h"
+using namespace std;
+int invertir(int n)
+{
+int inv=0;
+while(n>0)
+{
+inv=inv*10;
+inv=inv+(n%10);
+n=n/10;
+}
+return inv;
+}
+void generarnum(int v[], int n)
+{
+int a;
+for(int i=0;i<n;i++)
+{
+if(i<=3)
+{
+v[i]=powf(i,2);
+cout<<v[i]<<"__";
+}
+else
+{
+v[i]=powf(i,2);
+a=invertir(v[i]);
+cout<<a<<"___";
+}
+}
+}
+void main()
+{
+int v[100],a;
+do
+{
+cout<<"ingrese tamaño";
+cin>>a;
+}while(a<0);
+generarnum(v,a);
+getchar();
+system("pause");
+}
+• INVERTIR, CONTAR, CONCATENAR, DIGITOS REPETIDOS, ELIMINAR DIGITOS, ELIMINAR REPETIDOS
+#include "stdafx.h"
+#include "conio.h"
+#include <iostream>
+#include "math.h"
+using namespace std;
+int invertir(int n);
+int contar(int num);
+int concatenar(int a,int b);
+int digRepetido(int Num);
+int eliminarDig(int Num, int dig);
+void eliminarRepetidos(int Num);
+int main ()
+{
+int n, op,a,b,A,num;
+do
+{
+cout<<endl<<"-----MENU-----";
+cout<<endl<<"1. Concatenar dos numeros ";
+cout<<endl<<"2. Eliminar repetidos ";
+cout<<endl<<"3. Invertir un numero ";
+cout<<endl<<"4. Salir ";
+cout<<endl<<"Elegir una opcion";
+cin>>op;
+switch (op){
+case 1:
+cout<<"Ingrese un numero: ";
+cin>>a;
+cout<<"Ingrese otro numero: ";
+cin>>b;
+num=concatenar(a,b);
+cout<<endl<<"el numero concatenado es: "<<num;
+break;
+case 2:
+cout<<endl<<"ingrese un numero:";
+cin>>num;
+eliminarRepetidos(num);
+break;
+case 3:
+cout<<endl<<"Ingrese el numero que desea invertir: ";
+cin>>n;
+A=invertir(n);
+cout<<endl<<"el numero invertido es"<<A;
+break;
+case 4:
+cout <<"salir";
+break;
+default:
+cout<<"Error";
+break;
+}
+}while (op!=4);
+getchar();
+system("pause");
+return 0;
+}
+int invertir(int n)
+{
+int inv=0;
+while(n!=0)
+{
+inv=inv*10;
+inv=inv+(n%10);
+n=n/10;
+}
+return inv;
+}
+int digRepetido (int Num)
+{
+int s, aux,d1,d2,c;
+aux=Num;
+while(Num>0)
+{
+d1= Num%10;
+c=0;
+s=aux;
+while (s>0)
+{
+d2=s%10;
+if(d2==d1)
+{
+c++;
+}
+s=s/10;
+}
+if(c>1)
+{
+return(d1);
+}
+Num=Num/10;
+}
+return(-1);
+}
+int eliminarDig (int Num, int dig)
+{
+int x,s=0,m=1;
+while(Num>0)
+{
+x=Num%10;
+if(x!=dig)
+{
+s=s+(x*m);
+m=m*10;
+}
+Num=Num/10;
+}
+return(s);
+}
+void eliminarRepetidos(int Num)
+{
+int d;
+d=digRepetido(Num);
+while (d!=(-1))
+{
+Num= eliminarDig (Num, d);
+d= digRepetido (Num);
+}
+cout<<Num;
+}
+int contar(int num)
+{
+int cont=0;
+do
+{
+num=num/10;
+cont++;
+}while(num>0);
+return (cont);
+}
+int concatenar (int a, int b)
+{
+int num,n,contador=0;
+if(a>b)
+{
+contador= contar(a);
+num= powf(10,contador);
+n= (b*num)+a;
+}
+else
+{
+contador= contar(b);
+num= powf(10,contador);
+n= (a*num)+b;
+}
+return n;
+}
