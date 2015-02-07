@@ -1,0 +1,275 @@
+
+#include "stdafx.h"
+#include "stdafx.h"
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+struct Cliente
+{
+	int idcliente;
+	char nombre[30];
+	char direccion[30];
+};
+
+struct Conexion
+{
+	int idconexion;
+	int idcliente;
+	float costo;
+	float monto;
+}; 
+
+
+//cliente
+
+
+void creararchivo_cliente()
+{
+	FILE *ptr;
+	ptr=fopen("Clientes.dat","wb");
+	fclose(ptr);
+}
+
+
+void pedir_datos_cliente(Cliente &reg)
+{
+	
+	cout<<"INGRESAR IDCLIENTE: ";
+	cin>>reg.idcliente;
+	cout<<"INGRESAR NOMBRE: ";
+	do
+	{
+		gets(reg.nombre);
+	}while(strlen(reg.nombre)==0);
+	cout<<"INGRESAR DIRECCION: ";
+	do
+	{
+		gets(reg.direccion);
+	}while(strlen(reg.direccion)==0);
+}
+
+void adicionar_registro_cliente()
+{ 
+	Cliente reg;
+	FILE *ptr;
+	ptr=fopen("Clientes.dat","ab");
+	pedir_datos_cliente(reg);
+	fwrite(&reg,sizeof(reg),1,ptr);
+	fclose(ptr);
+}
+
+
+void mostrar_registro_cliente(Cliente reg)
+{
+	
+	
+	cout<<endl<<setw(10)<<reg.nombre<<"\t"<<setw(10)<<reg.direccion<<"\t"<<setw(10)<<"\t"<<reg.idcliente;
+}
+
+void reporte_cliente()
+{
+	system("cls");
+	Cliente reg;
+	FILE *ptr;
+	ptr=fopen("Clientes.dat","rb");
+	if(ptr==NULL)
+	{
+		cout<<"El archivo clientes no existe";
+	}
+	else
+	{
+		fread(&reg,sizeof(reg),1,ptr);
+		cout<<"NOMBRE\t   DIRECCION\t      ID CLIENTE "<<endl;
+		while(!feof(ptr))
+		{	
+			mostrar_registro_cliente(reg);
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		cout<<endl;
+	}
+	fclose(ptr);
+}
+
+//fin cliente
+
+//CONEXION
+
+void creararchivo_conexion()
+{
+	FILE *ptr;
+	ptr=fopen("Conexiones.dat","wb");
+	fclose(ptr);
+}
+
+
+void pedir_datos_conexion(Conexion &reg)
+{
+	
+	cout<<"INGRESAR IDCONEXION: ";
+	cin>>reg.idconexion;
+	cout<<"INGRESAR IDCLIENTE: ";
+	cin>>reg.idcliente;
+	cout<<"INGRESAR COSTO: ";
+	cin>>reg.costo;
+	cout<<"INGRESAR MONTO: ";
+	cin>>reg.monto;
+
+}
+
+void adicionar_registro_conexion()
+{ 
+	Conexion reg;
+	FILE *ptr;
+	ptr=fopen("Conexiones.dat","ab");
+	pedir_datos_conexion(reg);
+	fwrite(&reg,sizeof(reg),1,ptr);
+	fclose(ptr);
+}
+
+
+void mostrar_registro_conexion(Conexion reg)
+{
+	
+	
+	cout<<endl<<reg.idconexion<<"\t"<<setw(10)<<reg.idcliente<<"\t"<<setw(10)<<reg.costo<<"\t"<<setw(15)<<reg.monto;
+}
+
+void reporte_conexion()
+{
+	system("cls");
+	Conexion reg;
+	FILE *ptr;
+	ptr=fopen("Conexiones.dat","rb");
+	if(ptr==NULL)
+	{
+		cout<<"El archivo conexiones no existe";
+	}
+	else
+	{
+		fread(&reg,sizeof(reg),1,ptr);
+		cout<<"IDCONEXION\t   IDCLIENTE\t      COSTO\t   MONTO "<<endl;
+		while(!feof(ptr))
+		{	
+			mostrar_registro_conexion(reg);
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		cout<<endl;
+	}
+	fclose(ptr);
+}
+//FIN CONEXION
+
+Cliente obtener_cliente_por_id_cliente(int idcliente)
+{
+	Cliente reg;
+	reg.idcliente=-1;
+	FILE *ptr;
+	ptr=fopen("Clientes.dat","rb");
+	if(ptr==NULL)
+	{
+		cout<<"Archivo Clientes no existe"<<endl;
+	}
+	else
+	{
+		fread(&reg,sizeof(reg),1,ptr);
+		while(!feof(ptr))
+		{
+			if(reg.idcliente==idcliente)
+			{
+				fclose(ptr);
+				return reg;
+			}
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		fclose(ptr);
+		return reg;
+	}
+}
+
+void reporte_de_conexiones()
+{
+	Cliente A;
+	Conexion Conex;
+	FILE *ptr;
+	ptr=fopen("Conexiones.dat","rb");
+	if(ptr==NULL)
+	{
+		cout<<"Archivo Conexiones no existe"<<endl;
+	}
+	else
+	{
+		fread(&Conex,sizeof(Conex),1,ptr);
+		cout<<"ID CONEX\tNOMBRE\tDIRECCION\tCOSTO\tMONTO"<<endl;
+		while(!feof(ptr))
+		{
+			A=obtener_cliente_por_id_cliente(Conex.idcliente);
+			if(A.idcliente!=-1)
+			{
+				cout<<Conex.idconexion <<A.nombre<<" "<<A.direccion<<" "<<setw(7)<<Conex.costo<<"	"<<setw(7)<<Conex.monto<<endl;
+			}
+			fread(&Conex,sizeof(Conex),1,ptr);
+		}
+		fclose(ptr);
+	}
+
+}
+
+
+void main()
+{
+	
+	int op;
+	do{
+	cout<<"1.-Crear Clientes"<<endl;
+	cout<<"2.-Agregar Clientes"<<endl;
+	cout<<"3.-Listar Clientes"<<endl<<endl<<endl;
+	cout<<"4.-Crear Conexiones" <<endl;
+	cout<<"5.-Agregar Conexiones"<<endl;
+	cout<<"6.-Listar Conexiones" <<endl<<endl<<endl;
+	cout<<"7.-Reporte Conexiones "<<endl;
+	cout<<"8.-Salir "<<endl;
+	cout<<"Opcion: ";
+	cin>>op;
+	switch (op)
+	{
+		case 1:
+			creararchivo_cliente();
+			cout<<endl<<"Archivo Creado"<<endl;
+			system("pause");
+			break;
+		case 2:
+			adicionar_registro_cliente();
+			system("pause");
+			break;
+		case 3:
+			reporte_cliente();
+			system("pause");
+			break;
+		case 4:
+			creararchivo_conexion();
+			cout<<endl<<"Archivo Creado"<<endl;
+			system("pause");
+			break;
+		case 5:
+			adicionar_registro_conexion();
+			system("pause");
+			break;
+		case 6:
+			reporte_conexion();
+			system("pause");
+			break;
+		case 7:
+			system("cls");
+			reporte_de_conexiones();
+			cout<<endl;
+			system("pause");
+			break;
+		default:
+			break;
+	}
+	system("cls");
+	}while(op!=8);
+
+
+}e
